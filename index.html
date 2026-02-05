@@ -1,39 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Jabaroot</title>
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      background: linear-gradient(135deg, #020617, #0f172a);
-      color: #e5e7eb;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: system-ui, Arial, sans-serif;
-    }
-    .box {
-      text-align: center;
-      padding: 40px;
-      border-radius: 16px;
-      background: rgba(255,255,255,0.05);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-    }
-    h1 {
-      font-size: 32px;
-      margin-bottom: 10px;
-    }
-    p {
-      opacity: 0.7;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Jabaroot Chat</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  background: linear-gradient(135deg, #020617, #0f172a);
+  font-family: system-ui, Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #e5e7eb;
+}
+.chat {
+  width: 100%;
+  max-width: 420px;
+  height: 90vh;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.header {
+  padding: 16px;
+  text-align: center;
+  font-weight: bold;
+  background: rgba(255,255,255,0.05);
+}
+.messages {
+  flex: 1;
+  padding: 12px;
+  overflow-y: auto;
+}
+.msg {
+  max-width: 75%;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  border-radius: 14px;
+  font-size: 14px;
+}
+.user {
+  background: #2563eb;
+  margin-left: auto;
+}
+.bot {
+  background: #1f2933;
+}
+.input {
+  display: flex;
+  padding: 10px;
+  background: rgba(0,0,0,0.3);
+}
+input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  font-size: 14px;
+}
+button {
+  margin-left: 8px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  background: #22c55e;
+  color: #022c22;
+  font-weight: bold;
+}
+</style>
 </head>
 <body>
-  <div class="box">
-    <h1>Jabaroot Online</h1>
-    <p>GitHub Pages is live</p>
+
+<div class="chat">
+  <div class="header">Jabaroot AI</div>
+  <div class="messages" id="messages">
+    <div class="msg bot">Welcome. Chat is online.</div>
   </div>
+  <div class="input">
+    <input id="text" placeholder="Type message..." />
+    <button onclick="send()">Send</button>
+  </div>
+</div>
+
+<script>
+function send() {
+  const input = document.getElementById("text");
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  add(msg, "user");
+  input.value = "";
+
+  setTimeout(() => {
+    add("Message received.", "bot");
+  }, 500);
+}
+
+function add(text, type) {
+  const box = document.getElementById("messages");
+  const div = document.createElement("div");
+  div.className = "msg " + type;
+  div.textContent = text;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+</script>
+
 </body>
 </html>
