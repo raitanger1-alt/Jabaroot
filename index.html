@@ -1,116 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Jabaroot Chat</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-body {
-  margin: 0;
-  height: 100vh;
-  background: linear-gradient(135deg, #020617, #0f172a);
-  font-family: system-ui, Arial, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #e5e7eb;
-}
-.chat {
-  width: 100%;
-  max-width: 420px;
-  height: 90vh;
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(12px);
-  border-radius: 16px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-.header {
-  padding: 16px;
-  text-align: center;
-  font-weight: bold;
-  background: rgba(255,255,255,0.05);
-}
-.messages {
-  flex: 1;
-  padding: 12px;
-  overflow-y: auto;
-}
-.msg {
-  max-width: 75%;
-  padding: 10px 14px;
-  margin-bottom: 10px;
-  border-radius: 14px;
-  font-size: 14px;
-}
-.user {
-  background: #2563eb;
-  margin-left: auto;
-}
-.bot {
-  background: #1f2933;
-}
-.input {
-  display: flex;
-  padding: 10px;
-  background: rgba(0,0,0,0.3);
-}
-input {
-  flex: 1;
-  padding: 10px;
-  border-radius: 10px;
-  border: none;
-  outline: none;
-  font-size: 14px;
-}
-button {
-  margin-left: 8px;
-  padding: 10px 16px;
-  border-radius: 10px;
-  border: none;
-  background: #22c55e;
-  color: #022c22;
-  font-weight: bold;
-}
-</style>
-</head>
-<body>
+import express from "express";
+import fetch from "node-fetch";
 
-<div class="chat">
-  <div class="header">Jabaroot AI</div>
-  <div class="messages" id="messages">
-    <div class="msg bot">Welcome. Chat is online.</div>
-  </div>
-  <div class="input">
-    <input id="text" placeholder="Type message..." />
-    <button onclick="send()">Send</button>
-  </div>
-</div>
+const app = express();
+app.use(express.json());
 
-<script>
-function send() {
-  const input = document.getElementById("text");
-  const msg = input.value.trim();
-  if (!msg) return;
+const TOKEN = "PUT_YOUR_BOT_TOKEN_HERE";
+const TG = `https://api.telegram.org/bot${TOKEN}`;
 
-  add(msg, "user");
-  input.value = "";
+const memory = {};
 
-  setTimeout(() => {
-    add("Message received.", "bot");
-  }, 500);
+function think(user, text){
+  if(!memory[user]) memory[user] = [];
+  memory[user].push(text);
+  if(memory[user].length > 5) memory[user].shift();
+
+  const t = text.toLowerCase();
+
+  if(t.includes("سلام")) return "وعليكم السلام 👋";
+  if(t.includes("اسمك")) return "Jabaroot AI 🤖";
+  if(t.includes("كيفك")) return "تمام الحمد لله ❤️";
+  if(t.includes("help")) return "اكتب اللي في بالك.";
+
+  return "فاهمك 👍 كمل.";
 }
 
-function add(text, type) {
-  const box = document.getElementById("messages");
-  const div = document.createElement("div");
-  div.className = "msg " + type;
-  div.textContent = text;
-  box.appendChild(div);
-  box.scrollTop = box.scrollHeight;
-}
-</script>
+app.post("/", async (req,res)=>{
+  const msg = req.body.message;
+  if(!msg) return res.send("ok");
 
-</body>
-</html>
+  const chat = msg.chat.id;
+  const text = msg.text || "";
+
+  const reply = think(chat, text);
+
+  await fetch(`${TG}/sendMessage`,{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ chat_id: chat, text: reply })
+  });
+
+  res.send("ok");
+});
+
+app.post("/web", (req,res)=>{
+  const { user, text } = req.body;
+  const reply = think(user, text);
+  res.json({ reply });
+});
+
+app.listen(3000);
