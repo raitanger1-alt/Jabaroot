@@ -1,51 +1,49 @@
-import express from "express";
-import fetch from "node-fetch";
+<script>
+const botName = "Jabaroot";
 
-const app = express();
-app.use(express.json());
+const messages = document.querySelector(".messages");
+const input = document.querySelector("input");
+const sendBtn = document.querySelector("button");
 
-const TOKEN = "PUT_YOUR_BOT_TOKEN_HERE";
-const TG = `https://api.telegram.org/bot${TOKEN}`;
+// رسالة ترحيب
+window.onload = () => {
+  addMessage(`${botName}: أهلًا بيك 👋 أنا ${botName}. اكتبلي أي حاجة، بأي لغة.`, "bot");
+};
 
-const memory = {};
-
-function think(user, text){
-  if(!memory[user]) memory[user] = [];
-  memory[user].push(text);
-  if(memory[user].length > 5) memory[user].shift();
-
-  const t = text.toLowerCase();
-
-  if(t.includes("سلام")) return "وعليكم السلام 👋";
-  if(t.includes("اسمك")) return "Jabaroot AI 🤖";
-  if(t.includes("كيفك")) return "تمام الحمد لله ❤️";
-  if(t.includes("help")) return "اكتب اللي في بالك.";
-
-  return "فاهمك 👍 كمل.";
+// إضافة رسالة
+function addMessage(text, sender) {
+  const div = document.createElement("div");
+  div.className = `msg ${sender}`;
+  div.textContent = text;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
 }
 
-app.post("/", async (req,res)=>{
-  const msg = req.body.message;
-  if(!msg) return res.send("ok");
+// زر الإرسال
+sendBtn.onclick = () => {
+  const userText = input.value.trim();
+  if (!userText) return;
 
-  const chat = msg.chat.id;
-  const text = msg.text || "";
+  addMessage(userText, "user");
+  input.value = "";
 
-  const reply = think(chat, text);
+  setTimeout(() => {
+    smartReply(userText);
+  }, 600);
+};
 
-  await fetch(`${TG}/sendMessage`,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ chat_id: chat, text: reply })
-  });
+// رد ذكي بسيط
+function smartReply(text) {
+  let reply = "";
 
-  res.send("ok");
-});
+  if (/سلام|مرحبا|hello|hi/i.test(text)) {
+    reply = "أهلًا وسهلًا 🌍";
+  } else if (/كيف|how are you/i.test(text)) {
+    reply = "أنا تمام، الأهم إنت عامل إيه؟";
+  } else {
+    reply = "وصلتني رسالتك 👍 خلّيني نفكّر فيها أكتر.";
+  }
 
-app.post("/web", (req,res)=>{
-  const { user, text } = req.body;
-  const reply = think(user, text);
-  res.json({ reply });
-});
-
-app.listen(3000);
+  addMessage(`${botName}: ${reply}`, "bot");
+}
+</script>
